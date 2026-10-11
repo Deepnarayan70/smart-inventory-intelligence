@@ -1,0 +1,21 @@
+# Secrets and local environments
+.env
+.env.*
+!.env.example
+venv/
+.venv/
+env/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+
+# Local evidence and packaging outputs
+*.zip
+report-support/generated/
+
+# Editor/OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

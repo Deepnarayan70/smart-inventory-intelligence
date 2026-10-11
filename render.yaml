@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: smart-inventory-intelligence
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn run:app
+    healthCheckPath: /login
+    envVars:
+      - key: MONGO_URI
+        sync: false
+      - key: SECRET_KEY
+        generateValue: true
+      - key: AUTO_INIT_DB_INDEXES
+        value: "false"
+      - key: MONGO_ENABLE_SCHEMA_VALIDATION
+        value: "false"
