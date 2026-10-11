@@ -1,0 +1,131 @@
+/* Smart Inventory Intelligence & Food-Waste Prevention System CSS */
+:root {
+    --bg-primary: #f8f9fa;
+    --bg-card: #ffffff;
+    --bg-sidebar: #ffffff;
+    --text-primary: #212529;
+    --text-muted: #6c757d;
+    --accent-blue: #0d6efd;
+    --accent-emerald: #198754;
+    --accent-amber: #ffc107;
+    --accent-rose: #dc3545;
+    --border-color: #dee2e6;
+}
+
+body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
+}
+
+/* Sidebar & Navigation */
+.sidebar {
+    background-color: var(--bg-sidebar);
+    border-right: 1px solid var(--border-color);
+    min-height: 100vh;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.02);
+}
+
+.sidebar .nav-link {
+    color: var(--text-primary);
+    font-weight: 500;
+    padding: 0.75rem 1.25rem;
+    border-radius: 0.5rem;
+    margin-bottom: 0.25rem;
+    transition: all 0.2s ease-in-out;
+}
+
+.sidebar .nav-link:hover {
+    color: var(--accent-blue);
+    background-color: #f8f9fa;
+}
+
+.sidebar .nav-link.active {
+    color: #ffffff;
+    background-color: var(--accent-blue);
+}
+
+.sidebar-brand {
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: var(--text-primary);
+}
+
+/* Header Navbar */
+.top-header {
+    background-color: var(--bg-card);
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* Cards & Widgets */
+.kpi-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    padding: 1.25rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.kpi-icon-box {
+    width: 48px;
+    height: 48px;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+.chart-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    padding: 1.25rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+/* Tables */
+.table-custom {
+    color: var(--text-primary);
+}
+
+.table-custom th {
+    background-color: #f8f9fa;
+    color: #495057;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.table-custom td {
+    vertical-align: middle;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.table-custom tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+/* Badges */
+.badge-high {
+    background-color: #dc3545;
+    color: white;
+}
+
+.badge-medium {
+    background-color: #fd7e14;
+    color: white;
+}
+
+.badge-low {
+    background-color: #0d6efd;
+    color: white;
+}
+
+.badge-none {
+    background-color: #198754;
+    color: white;
+}

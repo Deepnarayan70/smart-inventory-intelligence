@@ -1,0 +1,239 @@
+{% extends "base.html" %}
+
+{% block title %}Product Catalog - Smart Inventory Intelligence{% endblock %}
+{% block page_title %}Product Management{% endblock %}
+
+{% block content %}
+<!-- Top Controls Bar -->
+<div class="card bg-white border mb-4 shadow-sm">
+    <div class="card-body py-3">
+        <form method="GET" action="{{ url_for('product.list_products') }}" class="row g-2 align-items-center">
+            <div class="col-md-4">
+                <div class="input-group">
+                    <span class="input-group-text bg-light text-muted"><i class="bi bi-search"></i></span>
+                    <input type="text" name="search" class="form-control" placeholder="Search by name or product ID..." value="{{ search }}">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <select name="category" class="form-select">
+                    <option value="">-- All Categories --</option>
+                    {% for cat in categories %}
+                    <option value="{{ cat }}" {% if selected_category == cat %}selected{% endif %}>{{ cat }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100"><i class="bi bi-filter me-1"></i> Filter</button>
+            </div>
+            <div class="col-md-3 text-end">
+                <button type="button" class="btn btn-success w-100" data-bs-toggle="modal" data-bs-target="#addProductModal">
+                    <i class="bi bi-plus-lg me-1"></i> Add New Product
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Products Data Table -->
+<div class="card bg-white border rounded-3 shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover table-custom mb-0">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Product Name</th>
+                        <th>Category</th>
+                        <th>Current Stock</th>
+                        <th>Reorder Level</th>
+                        <th>Unit Price</th>
+                        <th>Expiry Date</th>
+                        <th>Supplier</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in products %}
+                    <tr>
+                        <td class="fw-bold text-primary">{{ p.product_id }}</td>
+                        <td class="fw-semibold text-dark">{{ p.name }}</td>
+                        <td><span class="badge bg-light border text-dark">{{ p.category }}</span></td>
+                        <td>
+                            <span class="fw-bold {% if p.current_stock <= p.reorder_level %}text-danger{% else %}text-success{% endif %}">
+                                {{ p.current_stock }} {{ p.unit }}
+                            </span>
+                            {% if p.current_stock <= p.reorder_level %}
+                            <span class="badge badge-high ms-1">Low</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ p.reorder_level }} {{ p.unit }}</td>
+                        <td>${{ "%.2f"|format(p.unit_price) }}</td>
+                        <td>
+                            {% if p.expiry_date %}
+                            <span>{{ p.expiry_date }}</span>
+                            {% else %}
+                            <span class="text-muted">N/A</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="text-muted small">{{ p.supplier_id }}</span>
+                        </td>
+                        <td class="text-end">
+                            <button class="btn btn-sm btn-outline-primary me-1" data-bs-toggle="modal" data-bs-target="#editModal{{ p.product_id }}">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <form method="POST" action="{{ url_for('product.handle_delete_product', product_id=p.product_id) }}" class="d-inline" onsubmit="return confirm('Delete product {{ p.name }}?');">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+
+                    <!-- Edit Product Modal -->
+                    <div class="modal fade" id="editModal{{ p.product_id }}" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content border-0 shadow">
+                                <form method="POST" action="{{ url_for('product.handle_edit_product', product_id=p.product_id) }}">
+                                    <div class="modal-header bg-light border-bottom">
+                                        <h5 class="modal-title">Edit Product - {{ p.product_id }}</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="mb-3">
+                                            <label class="form-label">Product Name</label>
+                                            <input type="text" name="name" class="form-control" value="{{ p.name }}" required>
+                                        </div>
+                                        <div class="row g-2 mb-3">
+                                            <div class="col-6">
+                                                <label class="form-label">Category</label>
+                                                <input type="text" name="category" class="form-control" value="{{ p.category }}" required>
+                                            </div>
+                                            <div class="col-6">
+                                                <label class="form-label">Unit Type</label>
+                                                <input type="text" name="unit" class="form-control" value="{{ p.unit }}" required>
+                                            </div>
+                                        </div>
+                                        <div class="row g-2 mb-3">
+                                            <div class="col-6">
+                                                <label class="form-label">Current Stock</label>
+                                                <input type="number" name="current_stock" class="form-control" value="{{ p.current_stock }}" required min="0">
+                                            </div>
+                                            <div class="col-6">
+                                                <label class="form-label">Reorder Level</label>
+                                                <input type="number" name="reorder_level" class="form-control" value="{{ p.reorder_level }}" required min="0">
+                                            </div>
+                                        </div>
+                                        <div class="row g-2 mb-3">
+                                            <div class="col-6">
+                                                <label class="form-label">Unit Price ($)</label>
+                                                <input type="number" step="0.01" name="unit_price" class="form-control" value="{{ p.unit_price }}" required min="0">
+                                            </div>
+                                            <div class="col-6">
+                                                <label class="form-label">Expiry Date</label>
+                                                <input type="date" name="expiry_date" class="form-control" value="{{ p.expiry_date }}">
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Supplier</label>
+                                            <select name="supplier_id" class="form-select">
+                                                {% for sup in suppliers %}
+                                                <option value="{{ sup.supplier_id }}" {% if p.supplier_id == sup.supplier_id %}selected{% endif %}>
+                                                    {{ sup.name }} (Lead: {{ sup.lead_time_days }} days)
+                                                </option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer border-top">
+                                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <tr>
+                        <td colspan="9" class="text-center text-muted py-4">No products found. Add a new product or seed demo data.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Add Product Modal -->
+<div class="modal fade" id="addProductModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content border-0 shadow">
+            <form method="POST" action="{{ url_for('product.handle_add_product') }}">
+                <div class="modal-header bg-light border-bottom">
+                    <h5 class="modal-title">Add New Product</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Product ID</label>
+                        <input type="text" name="product_id" class="form-control" value="{{ next_pid }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Product Name</label>
+                        <input type="text" name="name" class="form-control" placeholder="e.g. Chicken Pesto Wrap" required>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label">Category</label>
+                            <select name="category" class="form-select" required>
+                                <option value="Dairy">Dairy</option>
+                                <option value="Bakery">Bakery</option>
+                                <option value="Prepared Food">Prepared Food</option>
+                                <option value="Beverages">Beverages</option>
+                                <option value="Produce">Produce</option>
+                                <option value="Snacks">Snacks</option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">Unit Type</label>
+                            <input type="text" name="unit" class="form-control" placeholder="e.g. Packs, Pieces, Cups" value="Packs" required>
+                        </div>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label">Initial Stock</label>
+                            <input type="number" name="current_stock" class="form-control" value="20" required min="0">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">Reorder Level</label>
+                            <input type="number" name="reorder_level" class="form-control" value="10" required min="0">
+                        </div>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label">Unit Price ($)</label>
+                            <input type="number" step="0.01" name="unit_price" class="form-control" value="4.50" required min="0">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">Expiry Date</label>
+                            <input type="date" name="expiry_date" class="form-control">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Supplier</label>
+                        <select name="supplier_id" class="form-select">
+                            {% for sup in suppliers %}
+                            <option value="{{ sup.supplier_id }}">{{ sup.name }} (Lead: {{ sup.lead_time_days }} days)</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer border-top">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success">Add Product</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

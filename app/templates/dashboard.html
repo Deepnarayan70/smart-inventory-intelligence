@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Smart Inventory Intelligence{% endblock %}
+{% block page_title %}Executive Dashboard{% endblock %}
+
+{% block content %}
+{% if inv.total_products == 0 %}
+<!-- Empty State -->
+<div class="card border-0 shadow-sm text-center py-5 mt-4">
+    <div class="card-body">
+        <i class="bi bi-inboxes text-muted mb-3" style="font-size: 4rem;"></i>
+        <h3 class="fw-bold text-dark">No products yet</h3>
+        <p class="text-muted mb-4">Start managing your inventory by adding your first product or seeding demo data.</p>
+        <div class="d-flex justify-content-center gap-3">
+            <a href="{{ url_for('product.list_products') }}" class="btn btn-primary fw-medium px-4 py-2">
+                <i class="bi bi-plus-lg me-1"></i> Add Product
+            </a>
+            <button id="btnSeedData" class="btn btn-outline-secondary fw-medium px-4 py-2">
+                <i class="bi bi-magic me-1"></i> Seed Demo Data
+            </button>
+        </div>
+    </div>
+</div>
+{% else %}
+<!-- Dashboard Content Header Actions -->
+<div class="d-flex justify-content-end mb-3">
+    <button id="btnSeedData" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-arrow-counterclockwise me-1"></i> Reset / Seed Demo Data
+    </button>
+</div>
+
+<!-- KPI Cards Row -->
+<div class="row g-3 mb-4">
+    <!-- Total Products -->
+    <div class="col-md-6 col-xl-3">
+        <div class="kpi-card d-flex align-items-center justify-content-between">
+            <div>
+                <span class="text-muted small text-uppercase">Total Products</span>
+                <h3 class="mb-0 text-dark fw-bold mt-1">{{ inv.total_products }}</h3>
+                <small class="text-primary"><i class="bi bi-tags me-1"></i>{{ inv.categories|length }} Categories</small>
+            </div>
+            <div class="kpi-icon-box bg-light text-primary border">
+                <i class="bi bi-box"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Inventory Valuation -->
+    <div class="col-md-6 col-xl-3">
+        <div class="kpi-card d-flex align-items-center justify-content-between">
+            <div>
+                <span class="text-muted small text-uppercase">Current Stock / Value</span>
+                <h3 class="mb-0 text-dark fw-bold mt-1">${{ "%.2f"|format(inv.total_inventory_value) }}</h3>
+                <small class="text-muted"><i class="bi bi-stack me-1"></i>{{ inv.total_stock_qty }} Units on Hand</small>
+            </div>
+            <div class="kpi-icon-box bg-light text-success border">
+                <i class="bi bi-currency-dollar"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Total Sales Revenue -->
+    <div class="col-md-6 col-xl-3">
+        <div class="kpi-card d-flex align-items-center justify-content-between">
+            <div>
+                <span class="text-muted small text-uppercase">Total Sales Revenue</span>
+                <h3 class="mb-0 text-dark fw-bold mt-1">${{ "%.2f"|format(sales.total_revenue) }}</h3>
+                <small class="text-success"><i class="bi bi-arrow-up-right me-1"></i>{{ sales.total_items_sold }} Units Sold</small>
+            </div>
+            <div class="kpi-icon-box bg-light text-primary border">
+                <i class="bi bi-graph-up"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Risk Alerts -->
+    <div class="col-md-6 col-xl-3">
+        <div class="kpi-card d-flex align-items-center justify-content-between">
+            <div>
+                <span class="text-muted small text-uppercase">Risk & Waste Alerts</span>
+                <h3 class="mb-0 text-danger fw-bold mt-1">{{ risk.total_alerts }}</h3>
+                <small class="text-danger">
+                    <i class="bi bi-exclamation-triangle me-1"></i>
+                    {{ risk.stockout_high + risk.expiry_high }} Critical High Risks
+                </small>
+            </div>
+            <div class="kpi-icon-box bg-light text-danger border">
+                <i class="bi bi-shield-alert"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Grid -->
+<div class="row g-3 mb-4">
+    <!-- Daily Sales Trend Chart -->
+    <div class="col-lg-8">
+        <div class="chart-card h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="mb-0 text-dark fw-semibold"><i class="bi bi-graph-up me-2 text-primary"></i>Sales & Revenue Trend (30 Days)</h6>
+                <span class="badge bg-light border text-muted">Daily Time-Series</span>
+            </div>
+            <div style="height: 280px; position: relative;">
+                <canvas id="chartSalesTrend"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Category Sales Breakdown -->
+    <div class="col-lg-4">
+        <div class="chart-card h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="mb-0 text-dark fw-semibold"><i class="bi bi-pie-chart me-2 text-success"></i>Revenue by Category</h6>
+            </div>
+            <div style="height: 280px; position: relative;">
+                <canvas id="chartCategory"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <!-- Stock vs 7-Day Demand -->
+    <div class="col-lg-7">
+        <div class="chart-card h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="mb-0 text-dark fw-semibold"><i class="bi bi-bar-chart me-2 text-warning"></i>Current Stock vs Predicted 7-Day Demand</h6>
+                <span class="badge bg-light border text-primary">ML Demand Forecast</span>
+            </div>
+            <div style="height: 260px; position: relative;">
+                <canvas id="chartStockVsDemand"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Risk Summary Distribution -->
+    <div class="col-lg-5">
+        <div class="chart-card h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="mb-0 text-dark fw-semibold"><i class="bi bi-shield-check me-2 text-danger"></i>Risk Breakdown Matrix</h6>
+            </div>
+            <div style="height: 260px; position: relative;">
+                <canvas id="chartRiskSummary"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Transactions Table -->
+<div class="card bg-white border rounded-3">
+    <div class="card-header bg-transparent border-bottom d-flex justify-content-between align-items-center py-3">
+        <h6 class="mb-0 text-dark"><i class="bi bi-clock-history me-2 text-primary"></i>Recent Sales Transactions</h6>
+        <a href="{{ url_for('sales.list_sales') }}" class="btn btn-sm btn-outline-primary">View All Sales</a>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover table-custom mb-0">
+                <thead>
+                    <tr>
+                        <th>Sale ID</th>
+                        <th>Product</th>
+                        <th>Category</th>
+                        <th>Date</th>
+                        <th>Quantity</th>
+                        <th>Unit Price</th>
+                        <th>Total Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in recent_sales %}
+                    <tr>
+                        <td class="fw-semibold text-primary">{{ s.sale_id }}</td>
+                        <td>{{ s.product_name }}</td>
+                        <td><span class="badge bg-light border text-dark">{{ s.category }}</span></td>
+                        <td>{{ s.date }}</td>
+                        <td>{{ s.quantity_sold }}</td>
+                        <td>${{ "%.2f"|format(s.selling_price) }}</td>
+                        <td class="fw-bold text-success">${{ "%.2f"|format(s.total_amount) }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-4">No sales recorded yet. Click "Seed Demo Data" to generate initial dataset.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

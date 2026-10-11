@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}Demand Forecasts - Smart Inventory Intelligence{% endblock %}
+{% block page_title %}Scikit-Learn Demand Forecasting{% endblock %}
+
+{% block content %}
+<!-- Top Header & Trigger Retrain Button -->
+<div class="card bg-white border shadow-sm mb-4">
+    <div class="card-body py-3 d-flex justify-content-between align-items-center">
+        <div>
+            <h5 class="mb-1 text-dark"><i class="bi bi-cpu me-2 text-primary"></i>Machine Learning Demand Prediction Service</h5>
+            <small class="text-muted">Utilizes Scikit-learn regression models with day-of-week, lag, and rolling time-series features.</small>
+        </div>
+        <form method="POST" action="{{ url_for('predictions.handle_run_predictions') }}">
+            <button type="submit" class="btn btn-primary font-semibold">
+                <i class="bi bi-arrow-repeat me-1"></i> Retrain & Forecast All
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Predictions Data Table -->
+<div class="card bg-white border rounded-3 shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover table-custom mb-0">
+                <thead>
+                    <tr>
+                        <th>Product ID</th>
+                        <th>Product Name</th>
+                        <th>Category</th>
+                        <th>Current Stock</th>
+                        <th>7-Day Demand Forecast</th>
+                        <th>7-Day Daily Breakdown</th>
+                        <th>Model Algorithm</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                    <tr>
+                        <td class="fw-bold text-primary">{{ item.product_id }}</td>
+                        <td class="fw-semibold text-dark">{{ item.product_name }}</td>
+                        <td><span class="badge bg-light border text-dark">{{ item.category }}</span></td>
+                        <td>
+                            <span class="fw-bold {% if item.current_stock <= item.reorder_level %}text-danger{% else %}text-success{% endif %}">
+                                {{ item.current_stock }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge bg-primary text-white fs-6 px-3 py-2">
+                                ~{{ item.predicted_demand_7d }} Units
+                            </span>
+                        </td>
+                        <td>
+                            <div class="d-flex gap-1 flex-wrap">
+                                {% for day_val in item.daily_forecast %}
+                                <span class="badge bg-light border text-muted" title="Day {{ loop.index }}: {{ day_val }} units">
+                                    D{{ loop.index }}: {{ day_val }}
+                                </span>
+                                {% endfor %}
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge bg-light border text-primary">
+                                <i class="bi bi-gear-wide-connected me-1"></i> {{ item.model_used }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-4">No prediction data found. Click "Retrain & Forecast All" above.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

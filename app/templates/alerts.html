@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}Risk Alerts & Recommendations - Smart Inventory Intelligence{% endblock %}
+{% block page_title %}Stockout & Food-Waste Prevention Matrix{% endblock %}
+
+{% block content %}
+<!-- Risk Summary Banner -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="kpi-card text-center border-danger bg-white">
+            <span class="text-danger small fw-bold text-uppercase">High Stockout Risk</span>
+            <h3 class="mb-0 text-danger fw-bold mt-1">{{ summary.stockout_high }}</h3>
+            <small class="text-muted">Urgent Restock Needed</small>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="kpi-card text-center border-warning bg-white">
+            <span class="text-warning small fw-bold text-uppercase">Medium Stockout Risk</span>
+            <h3 class="mb-0 text-warning fw-bold mt-1">{{ summary.stockout_medium }}</h3>
+            <small class="text-muted">Reorder Soon</small>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="kpi-card text-center bg-white" style="border-color: #dc3545;">
+            <span class="small fw-bold text-uppercase" style="color: #dc3545;">High Expiry/Waste Risk</span>
+            <h3 class="mb-0 fw-bold mt-1" style="color: #dc3545;">{{ summary.expiry_high }}</h3>
+            <small class="text-muted">Promotional Sale Urged</small>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="kpi-card text-center bg-white" style="border-color: #fd7e14;">
+            <span class="small fw-bold text-uppercase" style="color: #fd7e14;">Medium Expiry/Waste Risk</span>
+            <h3 class="mb-0 fw-bold mt-1" style="color: #fd7e14;">{{ summary.expiry_medium }}</h3>
+            <small class="text-muted">Monitor Spoilage</small>
+        </div>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="btn-group" role="group">
+        <a href="{{ url_for('alerts.list_alerts', filter='all') }}" class="btn btn-sm {% if filter == 'all' %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+            All Products Matrix
+        </a>
+        <a href="{{ url_for('alerts.list_alerts', filter='stockout') }}" class="btn btn-sm {% if filter == 'stockout' %}btn-danger{% else %}btn-outline-secondary{% endif %}">
+            Stockout Risks Only
+        </a>
+        <a href="{{ url_for('alerts.list_alerts', filter='expiry') }}" class="btn btn-sm {% if filter == 'expiry' %}btn-warning{% else %}btn-outline-secondary{% endif %}">
+            Expiry & Waste Risks Only
+        </a>
+    </div>
+    <span class="text-muted small">Updated in real-time based on demand forecasts</span>
+</div>
+
+<!-- Risk & Recommendation Table -->
+<div class="card bg-white border rounded-3 shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover table-custom mb-0">
+                <thead>
+                    <tr>
+                        <th>Product Name</th>
+                        <th>Stock / Reorder</th>
+                        <th>7d Forecast</th>
+                        <th>Expiry Date</th>
+                        <th>Stockout Risk</th>
+                        <th>Expiry/Waste Risk</th>
+                        <th>Actionable Recommendation</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in risks %}
+                    <tr>
+                        <td>
+                            <div class="fw-bold text-dark">{{ r.product_name }}</div>
+                            <small class="text-muted">{{ r.product_id }} | {{ r.category }}</small>
+                        </td>
+                        <td>
+                            <div class="fw-semibold text-dark">{{ r.current_stock }} units</div>
+                            <small class="text-muted">Reorder at: {{ r.reorder_level }}</small>
+                        </td>
+                        <td>
+                            <span class="badge bg-light border text-primary">
+                                ~{{ r.predicted_demand_7d }} units
+                            </span>
+                        </td>
+                        <td>
+                            {% if r.expiry_date %}
+                            <div>{{ r.expiry_date }}</div>
+                            <small class="{% if r.days_to_expiry <= 3 %}text-danger fw-bold{% else %}text-muted{% endif %}">
+                                ({{ r.days_to_expiry }} days left)
+                            </small>
+                            {% else %}
+                            <span class="text-muted">N/A</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if r.stockout_risk == 'HIGH' %}
+                            <span class="badge badge-high"><i class="bi bi-x-circle me-1"></i>HIGH</span>
+                            {% elif r.stockout_risk == 'MEDIUM' %}
+                            <span class="badge badge-medium"><i class="bi bi-exclamation-triangle me-1"></i>MEDIUM</span>
+                            {% elif r.stockout_risk == 'LOW' %}
+                            <span class="badge badge-low">LOW</span>
+                            {% else %}
+                            <span class="badge badge-none"><i class="bi bi-check-circle me-1"></i>SAFE</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if r.expiry_risk == 'HIGH' %}
+                            <span class="badge badge-high"><i class="bi bi-exclamation-circle me-1"></i>HIGH</span>
+                            {% elif r.expiry_risk == 'MEDIUM' %}
+                            <span class="badge badge-medium"><i class="bi bi-hourglass-split me-1"></i>MEDIUM</span>
+                            {% elif r.expiry_risk == 'LOW' %}
+                            <span class="badge badge-low">LOW</span>
+                            {% else %}
+                            <span class="badge badge-none"><i class="bi bi-check-circle me-1"></i>SAFE</span>
+                            {% endif %}
+                        </td>
+                        <td style="max-width: 320px;">
+                            <div class="p-2 rounded bg-light border small text-dark">
+                                <i class="bi bi-lightbulb text-warning me-1"></i> {{ r.recommendation }}
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-4">No risk alerts found for this filter.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
