@@ -78,15 +78,7 @@
                 <div class="d-flex justify-content-between align-items-center pb-3 mb-4 border-bottom">
                     <div>
                         <h4 class="mb-0 text-dark">{% block page_title %}Smart Inventory Intelligence{% endblock %}</h4>
-                        <small class="text-muted">Inventory tracking, demand forecasting and food-waste prevention</small>
-                    </div>
-                    <div class="d-flex align-items-center gap-2">
-                        <span class="badge bg-light border text-primary px-3 py-2">
-                            <i class="bi bi-database me-1"></i> MongoDB Connected
-                        </span>
-                        <span class="badge bg-light border text-success px-3 py-2">
-                            <i class="bi bi-cpu me-1"></i> ML Engine Ready
-                        </span>
+                        <small class="text-muted">{% block page_subtitle %}Manage stock, track sales and stay ahead of demand.{% endblock %}</small>
                     </div>
                 </div>
                 {% endif %}

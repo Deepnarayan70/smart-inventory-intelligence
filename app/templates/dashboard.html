@@ -1,7 +1,8 @@
 {% extends "base.html" %}
 
 {% block title %}Dashboard - Smart Inventory Intelligence{% endblock %}
-{% block page_title %}Executive Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+{% block page_subtitle %}Overview of stock levels, sales performance and active risk alerts.{% endblock %}
 
 {% block content %}
 {% if inv.total_products == 0 %}
@@ -97,8 +98,7 @@
     <div class="col-lg-8">
         <div class="chart-card h-100">
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <h6 class="mb-0 text-dark fw-semibold"><i class="bi bi-graph-up me-2 text-primary"></i>Sales & Revenue Trend (30 Days)</h6>
-                <span class="badge bg-light border text-muted">Daily Time-Series</span>
+                <h6 class="mb-0 text-dark fw-semibold"><i class="bi bi-graph-up me-2 text-primary"></i>Sales &amp; Revenue Trend (30 Days)</h6>
             </div>
             <div style="height: 280px; position: relative;">
                 <canvas id="chartSalesTrend"></canvas>
@@ -124,8 +124,7 @@
     <div class="col-lg-7">
         <div class="chart-card h-100">
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <h6 class="mb-0 text-dark fw-semibold"><i class="bi bi-bar-chart me-2 text-warning"></i>Current Stock vs Predicted 7-Day Demand</h6>
-                <span class="badge bg-light border text-primary">ML Demand Forecast</span>
+                <h6 class="mb-0 text-dark fw-semibold"><i class="bi bi-bar-chart me-2 text-warning"></i>Current Stock vs 7-Day Forecast</h6>
             </div>
             <div style="height: 260px; position: relative;">
                 <canvas id="chartStockVsDemand"></canvas>
@@ -137,7 +136,7 @@
     <div class="col-lg-5">
         <div class="chart-card h-100">
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <h6 class="mb-0 text-dark fw-semibold"><i class="bi bi-shield-check me-2 text-danger"></i>Risk Breakdown Matrix</h6>
+                <h6 class="mb-0 text-dark fw-semibold"><i class="bi bi-shield-check me-2 text-danger"></i>Risk Summary</h6>
             </div>
             <div style="height: 260px; position: relative;">
                 <canvas id="chartRiskSummary"></canvas>

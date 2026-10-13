@@ -1,7 +1,8 @@
 {% extends "base.html" %}
 
-{% block title %}Risk Alerts & Recommendations - Smart Inventory Intelligence{% endblock %}
-{% block page_title %}Stockout & Food-Waste Prevention Matrix{% endblock %}
+{% block title %}Risk Alerts & Actions - Smart Inventory Intelligence{% endblock %}
+{% block page_title %}Risk Alerts & Actions{% endblock %}
+{% block page_subtitle %}Identify stockout risks, expiry issues and recommended actions for your products.{% endblock %}
 
 {% block content %}
 <!-- Risk Summary Banner -->
@@ -40,7 +41,7 @@
 <div class="d-flex justify-content-between align-items-center mb-3">
     <div class="btn-group" role="group">
         <a href="{{ url_for('alerts.list_alerts', filter='all') }}" class="btn btn-sm {% if filter == 'all' %}btn-primary{% else %}btn-outline-secondary{% endif %}">
-            All Products Matrix
+            All Products
         </a>
         <a href="{{ url_for('alerts.list_alerts', filter='stockout') }}" class="btn btn-sm {% if filter == 'stockout' %}btn-danger{% else %}btn-outline-secondary{% endif %}">
             Stockout Risks Only
