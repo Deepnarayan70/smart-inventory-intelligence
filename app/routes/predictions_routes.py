@@ -20,7 +20,7 @@ def handle_run_predictions():
     user_id = session['user_id']
     try:
         results = run_all_predictions(db, user_id)
-        flash(f"Scikit-learn demand prediction models retrained and updated for {len(results)} products!", "success")
+        flash(f"Demand forecasts updated successfully for {len(results)} products.", "success")
     except Exception as e:
         flash(f"Error training models: {str(e)}", "danger")
 
